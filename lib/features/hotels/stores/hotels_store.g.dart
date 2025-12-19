@@ -58,6 +58,26 @@ mixin _$HotelsStore on _HotelsStore, Store {
     });
   }
 
+  late final _$loadHotelsAsyncAction = AsyncAction(
+    '_HotelsStore.loadHotels',
+    context: context,
+  );
+
+  @override
+  Future<void> loadHotels() {
+    return _$loadHotelsAsyncAction.run(() => super.loadHotels());
+  }
+
+  late final _$addHotelAsyncAction = AsyncAction(
+    '_HotelsStore.addHotel',
+    context: context,
+  );
+
+  @override
+  Future<void> addHotel(Hotel hotel) {
+    return _$addHotelAsyncAction.run(() => super.addHotel(hotel));
+  }
+
   late final _$_HotelsStoreActionController = ActionController(
     name: '_HotelsStore',
     context: context,

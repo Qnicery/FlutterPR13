@@ -1,29 +1,30 @@
 import 'package:mobx/mobx.dart';
 import '../models/review.dart';
-
+import '../data/api/hotels_api.dart';
 
 part 'review_store.g.dart';
-
 
 class ReviewStore = _ReviewStore with _$ReviewStore;
 
 abstract class _ReviewStore with Store {
+  final HotelsApi _api = HotelsApi();
+
+
   @observable
-  ObservableList<Review> reviews = ObservableList.of([
-    Review(userName: "userName", rating: 3,
-        text: "Очень большой отзыв Очень большой отзыв Очень большой отзыв Очень большой отзыв Очень большой отзыв Очень большой отзыв Очень большой отзыв Очень большой отзыв",
-        hotelId: "1"),
-    Review(userName: "userName", rating: 2, text: "text", hotelId: "1"),
-    Review(userName: "userName", rating: 4, text: "Очень большой отзыв Очень большой отзыв Очень большой отзыв Очень большой отзывОчень большой отзыв Очень большой отзыв Очень большой отзыв Очень большой отзыв", hotelId: "1")
-  ]);
+  ObservableList<Review> reviews = ObservableList<Review>();
 
   List<Review> reviewsForHotel(String hotelId) =>
       reviews.where((r) => r.hotelId == hotelId).toList();
 
   @action
-  void addReview(Review review) {
-    reviews.add(review);
+  Future<void> loadReviews(String hotelId) async {
+    final list = await _api.getReviewsByHotelId(hotelId);
+    reviews = ObservableList.of(list);
+  }
+
+  @action
+  Future<void> addReview(Review review) async {
+    final newReview = await _api.addReview(review);
+    reviews.add(newReview);
   }
 }
-
-

@@ -13,7 +13,7 @@ class ReviewList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = getIt<ReviewStore>();
-
+    store.loadReviews(hotel.id);
     return Observer(
       builder: (_) {
         final items = store.reviewsForHotel(hotel.id);

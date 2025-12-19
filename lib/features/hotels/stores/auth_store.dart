@@ -82,7 +82,7 @@ abstract class _AuthStore with Store {
 
   Future<void> _loadProfile(int id) async {
     final data = await _api.getUser(id);
-    currentUser = User.fromReqRes(data);
+    currentUser = User.fromJson(data);
 
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt(keyUserId, id);

@@ -11,7 +11,7 @@ class User {
     required this.pass
   });
 
-  factory User.fromReqRes(Map<String, dynamic> json) {
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
       email: json['email'],

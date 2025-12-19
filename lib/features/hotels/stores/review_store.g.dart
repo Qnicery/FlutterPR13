@@ -27,21 +27,24 @@ mixin _$ReviewStore on _ReviewStore, Store {
     });
   }
 
-  late final _$_ReviewStoreActionController = ActionController(
-    name: '_ReviewStore',
+  late final _$loadReviewsAsyncAction = AsyncAction(
+    '_ReviewStore.loadReviews',
     context: context,
   );
 
   @override
-  void addReview(Review review) {
-    final _$actionInfo = _$_ReviewStoreActionController.startAction(
-      name: '_ReviewStore.addReview',
-    );
-    try {
-      return super.addReview(review);
-    } finally {
-      _$_ReviewStoreActionController.endAction(_$actionInfo);
-    }
+  Future<void> loadReviews(String hotelId) {
+    return _$loadReviewsAsyncAction.run(() => super.loadReviews(hotelId));
+  }
+
+  late final _$addReviewAsyncAction = AsyncAction(
+    '_ReviewStore.addReview',
+    context: context,
+  );
+
+  @override
+  Future<void> addReview(Review review) {
+    return _$addReviewAsyncAction.run(() => super.addReview(review));
   }
 
   @override

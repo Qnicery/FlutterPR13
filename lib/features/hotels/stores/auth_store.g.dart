@@ -52,7 +52,9 @@ mixin _$AuthStore on _AuthStore, Store {
 
   @override
   Future<String?> register(String email, String password, String name) {
-    return _$registerAsyncAction.run(() => super.register(email, password, name));
+    return _$registerAsyncAction.run(
+      () => super.register(email, password, name),
+    );
   }
 
   late final _$logoutAsyncAction = AsyncAction(
