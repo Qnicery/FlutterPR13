@@ -34,6 +34,13 @@ class SettingsScreen extends StatelessWidget {
               child: const Text('Выйти'),
             ),
             const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                getIt<AuthStore>().deleteAccount();
+                GoRouter.of(context).go('/login');
+              },
+              child: const Text('Удалить аккаунт'),
+            ),
           ],
         ),
       ),

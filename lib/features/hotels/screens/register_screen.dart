@@ -97,7 +97,7 @@ class RegisterScreen extends StatelessWidget {
                               );
                               return;
                             }
-                            final String? error = await authStore.register(name, email, pass);
+                            final String? error = await authStore.register(email, pass, name);
 
                             if (error != null) {
                               ScaffoldMessenger.of(context).showSnackBar(

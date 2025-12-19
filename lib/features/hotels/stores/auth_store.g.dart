@@ -17,21 +17,6 @@ mixin _$AuthStore on _AuthStore, Store {
     name: '_AuthStore.isLoggedIn',
   )).value;
 
-  late final _$usersAtom = Atom(name: '_AuthStore.users', context: context);
-
-  @override
-  ObservableList<User> get users {
-    _$usersAtom.reportRead();
-    return super.users;
-  }
-
-  @override
-  set users(ObservableList<User> value) {
-    _$usersAtom.reportWrite(value, super.users, () {
-      super.users = value;
-    });
-  }
-
   late final _$currentUserAtom = Atom(
     name: '_AuthStore.currentUser',
     context: context,
@@ -50,26 +35,24 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
-  late final _$registerAsyncAction = AsyncAction(
-    '_AuthStore.register',
-    context: context,
-  );
-
-  @override
-  Future<String?> register(String name, String email, String password) {
-    return _$registerAsyncAction.run(
-      () => super.register(name, email, password),
-    );
-  }
-
   late final _$loginAsyncAction = AsyncAction(
     '_AuthStore.login',
     context: context,
   );
 
   @override
-  Future<String?> login(String login, String password) {
-    return _$loginAsyncAction.run(() => super.login(login, password));
+  Future<String?> login(String email, String password) {
+    return _$loginAsyncAction.run(() => super.login(email, password));
+  }
+
+  late final _$registerAsyncAction = AsyncAction(
+    '_AuthStore.register',
+    context: context,
+  );
+
+  @override
+  Future<String?> register(String email, String password, String name) {
+    return _$registerAsyncAction.run(() => super.register(email, password, name));
   }
 
   late final _$logoutAsyncAction = AsyncAction(
@@ -82,10 +65,19 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$logoutAsyncAction.run(() => super.logout());
   }
 
+  late final _$deleteAccountAsyncAction = AsyncAction(
+    '_AuthStore.deleteAccount',
+    context: context,
+  );
+
+  @override
+  Future<void> deleteAccount() {
+    return _$deleteAccountAsyncAction.run(() => super.deleteAccount());
+  }
+
   @override
   String toString() {
     return '''
-users: ${users},
 currentUser: ${currentUser},
 isLoggedIn: ${isLoggedIn}
     ''';

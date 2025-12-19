@@ -1,6 +1,6 @@
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../data/api/auth_api.dart';
 import '../models/user.dart';
 
 part 'auth_store.g.dart';
@@ -8,97 +8,85 @@ part 'auth_store.g.dart';
 class AuthStore = _AuthStore with _$AuthStore;
 
 abstract class _AuthStore with Store {
-  static const String keyUserId = "current_user_id";
+  static const keyUserId = 'current_user_id';
 
-  @observable
-  ObservableList<User> users = ObservableList.of(
-    [
-      User(
-        id: 1,
-        name: "Admin",
-        email: "test@mail.ru",
-        password: "1",
-      ),
-    ],
-  );
+  final AuthApi _api = AuthApi();
 
   @observable
   User? currentUser;
 
-  _AuthStore() {
-    _loadUserFromPrefs();
-  }
-
   @computed
   bool get isLoggedIn => currentUser != null;
 
-
-
-  Future<void> _saveCurrentUserId(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(keyUserId, id);
-  }
-
-  Future<void> _removeSavedUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(keyUserId);
-  }
-
-  Future<void> _loadUserFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedId = prefs.getInt(keyUserId);
-
-    if (savedId != null) {
-      try {
-        currentUser = users.firstWhere((u) => u.id == savedId);
-      } catch (_) {
-        currentUser = null;
-      }
-    }
+  _AuthStore() {
+    _loadUser();
   }
 
   @action
-  Future<String?> register(String name, String email, String password) async {
-    if (users.any((u) => u.email == email)) {
-      return 'Почта уже используется';
-    }
+  Future<String?> login(String email, String password) async {
+    try {
+      await _api.login(email, password);
 
-    final user = User(
-      id: users.length + 1,
-      name: name,
-      email: email,
-      password: password,
-    );
+      // После успешного логина получаем профиль
+      final id = await _fetchUserIdAfterLogin();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setInt(keyUserId, id);
 
-    users.add(user);
-    currentUser = user;
-
-    await _saveCurrentUserId(user.id);
-
-    return null;
-  }
-
-  @action
-  Future<String?> login(String login, String password) async {
-    final user = users.firstWhere(
-          (u) => (u.email == login || u.name == login) && u.password == password,
-      orElse: () => User(id: -1, name: '', email: '', password: ''),
-    );
-
-    if (user.id == -1) {
+      await _loadProfile(id);
+      return null;
+    } catch (e) {
       return 'Неверные данные';
     }
+  }
 
-    currentUser = user;
+  @action
+  Future<String?> register(String email, String password, String name) async {
+    try {
+      final id = await _api.register(email, password, name);
 
-    await _saveCurrentUserId(user.id);
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setInt(keyUserId, id);
 
-    return null;
+      await _loadProfile(id);
+      return null;
+    } catch (e) {
+      return 'Ошибка регистрации: ${e.toString()}';
+    }
   }
 
   @action
   Future<void> logout() async {
     currentUser = null;
-    await _removeSavedUser();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(keyUserId);
+    _api.setToken('');
   }
+
+  @action
+  Future<void> deleteAccount() async {
+    if (currentUser == null) return;
+    await _api.deleteUser(currentUser!.id);
+    await logout();
+  }
+
+  Future<void> _loadProfile(int id) async {
+    final data = await _api.getUser(id);
+    currentUser = User.fromReqRes(data);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt(keyUserId, id);
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getInt(keyUserId);
+    if (id != null) {
+      await _loadProfile(id);
+    }
+  }
+
+  Future<int> _fetchUserIdAfterLogin() async {
+    final data = await _api.getMe(); // новый метод в AuthApi
+    return data['user']['id'];
+  }
+
 }
