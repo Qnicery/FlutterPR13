@@ -27,7 +27,6 @@ abstract class _AuthStore with Store {
     try {
       await _api.login(email, password);
 
-      // После успешного логина получаем профиль
       final id = await _fetchUserIdAfterLogin();
       final prefs = await SharedPreferences.getInstance();
       prefs.setInt(keyUserId, id);
@@ -85,7 +84,7 @@ abstract class _AuthStore with Store {
   }
 
   Future<int> _fetchUserIdAfterLogin() async {
-    final data = await _api.getMe(); // новый метод в AuthApi
+    final data = await _api.getMe();
     return data['user']['id'];
   }
 

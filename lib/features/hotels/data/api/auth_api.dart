@@ -51,7 +51,7 @@ class AuthApi {
 
   Future<Map<String, dynamic>> getUser(int id) async {
     final response = await dio.get('/users/$id');
-    return response.data; // возвращает Map<String,dynamic>
+    return response.data;
   }
 
   Future<void> getUsers() async {
